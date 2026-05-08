@@ -85,23 +85,18 @@ ask_secret() {
 show_interactive_menu() {
     echo "${BOLD}What do you want to install?${NC}"
     echo
-    echo "  1) Hugo MCP server       (FastAPI service for Hugo static sites)"
-    echo "  2) Grav MCP plugin       (plugin for Grav CMS)"
-    echo "  3) OAuth 2.1 proxy       (required for Claude.ai authentication)"
-    echo "  4) All of the above"
-    echo "  5) Exit"
-    echo
 
-    while true; do
-        read -r -p "${YELLOW}?${NC} Your choice [1-5]: " choice
-        case "$choice" in
-            1) INSTALL_HUGO=1  ;;
-            2) INSTALL_GRAV=1  ;;
-            3) INSTALL_OAUTH=1 ;;
-            4) INSTALL_HUGO=1; INSTALL_GRAV=1; INSTALL_OAUTH=1 ;;
-            5) echo "Aborted."; exit 0 ;;
-            *) echo "  Please enter 1-5." ; continue ;;
-        esac
-        break
-    done
+    ask_yes_no "Hugo MCP server       (FastAPI service for Hugo static sites)" "n" \
+        && INSTALL_HUGO=1 || INSTALL_HUGO=0
+
+    ask_yes_no "Grav MCP plugin       (plugin for Grav CMS)" "n" \
+        && INSTALL_GRAV=1 || INSTALL_GRAV=0
+
+    ask_yes_no "OAuth 2.1 proxy       (required for Claude.ai authentication)" "n" \
+        && INSTALL_OAUTH=1 || INSTALL_OAUTH=0
+
+    if [[ "$INSTALL_HUGO" == "0" && "$INSTALL_GRAV" == "0" && "$INSTALL_OAUTH" == "0" ]]; then
+        echo "Nothing selected. Aborted."
+        exit 0
+    fi
 }

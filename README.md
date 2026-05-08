@@ -14,7 +14,7 @@ Compatible with: Ubuntu 22.04+, Debian 12+, Fedora 38+, Rocky/Alma 9+.
 curl -sSL https://raw.githubusercontent.com/jmrGrav/mcp-installer/main/install.sh | sudo bash
 ```
 
-You'll be guided through an interactive menu.
+You'll be guided through 3 independent y/n questions — any combination of components can be selected.
 
 ## Quick start (git clone, recommended for review)
 
