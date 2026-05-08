@@ -80,7 +80,8 @@ ask_secret() {
     done
 }
 
-# show_interactive_menu — sets INSTALL_GRAV, INSTALL_HUGO, INSTALL_OAUTH
+# show_interactive_menu — sets INSTALL_GRAV, INSTALL_HUGO, INSTALL_OAUTH in caller's scope
+# shellcheck disable=SC2034
 show_interactive_menu() {
     echo "${BOLD}What do you want to install?${NC}"
     echo
