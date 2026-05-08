@@ -142,6 +142,8 @@ chmod -R g+rX "$INSTALL_DIR"
 chmod 750 "$INSTALL_DIR/deploy.sh"
 
 # Site Hugo : hugo-mcp doit être OWNER complet
+# mkdir -p garantit que content/ et public/ existent (site fresh sans premier build)
+mkdir -p "$HUGO_SITE_PATH/content" "$HUGO_SITE_PATH/public"
 chown "$SERVICE_USER":"$SERVICE_USER" "$HUGO_SITE_PATH"
 chown -R "$SERVICE_USER":"$SERVICE_USER" "$HUGO_SITE_PATH/content"
 chown -R "$SERVICE_USER":"$SERVICE_USER" "$HUGO_SITE_PATH/public"
