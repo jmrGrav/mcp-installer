@@ -40,12 +40,19 @@ ask_value DOMAIN         "Public domain for Hugo MCP (e.g. mcp-hugo.example.com)
 ask_value HUGO_SITE_PATH "Path to your existing Hugo site"                         "${HUGO_SITE_PATH:-/var/www/hugo-site}"
 ask_value MCP_PORT       "Listen port (internal, nginx will proxy this)"           "${MCP_PORT:-8000}"
 
-# Token : généré par défaut, surchargeable via env en mode silent
-if [[ "${SILENT_MODE:-0}" == "1" ]] && [[ -n "${MCP_TOKEN:-}" ]]; then
-    log_info "Using provided MCP_TOKEN"
-else
+# Token : préserver si existant, générer sinon (--force-rotate-tokens pour forcer la rotation)
+MCP_TOKEN="${MCP_TOKEN:-}"
+if [[ "${FORCE_ROTATE_TOKENS:-0}" != "1" ]] && [[ -f "$INSTALL_DIR/.env" ]]; then
+    _tok=$(grep '^MCP_TOKEN=' "$INSTALL_DIR/.env" 2>/dev/null | cut -d= -f2- | tr -d '"' || true)
+    [[ -n "$_tok" ]] && MCP_TOKEN="$_tok" && log_info "MCP_TOKEN preserved from existing $INSTALL_DIR/.env"
+fi
+if [[ -z "$MCP_TOKEN" ]]; then
     MCP_TOKEN=$(generate_token 32)
-    log_info "Generated MCP_TOKEN (saved in summary file)"
+    if [[ "${FORCE_ROTATE_TOKENS:-0}" == "1" ]]; then
+        log_warn "MCP_TOKEN rotated (--force-rotate-tokens). Claude.ai connector will need re-authentication."
+    else
+        log_info "MCP_TOKEN generated (saved in summary file)"
+    fi
 fi
 
 # Cloudflare (optionnel)

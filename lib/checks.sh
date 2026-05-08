@@ -112,3 +112,32 @@ check_curl() {
     fi
     log_ok "curl"
 }
+
+# ── Pre-flight checks ─────────────────────────────────────────────────────────
+
+preflight_hugo_mcp() {
+    local errors=0
+    for cmd in hugo git python3 openssl; do
+        command -v "$cmd" >/dev/null || { log_error "pre-flight: '$cmd' not found"; ((errors++)); }
+    done
+    [[ $errors -eq 0 ]] && return 0 || return 1
+}
+
+preflight_oauth_proxy() {
+    local errors=0
+    for cmd in python3 openssl git; do
+        command -v "$cmd" >/dev/null || { log_error "pre-flight: '$cmd' not found"; ((errors++)); }
+    done
+    if ! command -v nginx >/dev/null; then
+        log_error "pre-flight: 'nginx' not found (required as TLS frontend)"
+        ((errors++))
+    fi
+    [[ $errors -eq 0 ]] && return 0 || return 1
+}
+
+preflight_grav_mcp() {
+    local errors=0
+    command -v php >/dev/null || { log_error "pre-flight: 'php' not found"; ((errors++)); }
+    command -v git >/dev/null || { log_error "pre-flight: 'git' not found"; ((errors++)); }
+    [[ $errors -eq 0 ]] && return 0 || return 1
+}

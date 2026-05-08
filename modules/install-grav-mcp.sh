@@ -46,12 +46,20 @@ else
 fi
 log_info "Detected Grav web user: $GRAV_USER"
 
-# API key : générée par défaut, surchargeable via env en mode silent
-if [[ "${SILENT_MODE:-0}" == "1" ]] && [[ -n "${MCP_API_KEY:-}" ]]; then
-    log_info "Using provided MCP_API_KEY"
-else
+# API key : préserver si existante (--force-rotate-tokens pour forcer)
+MCP_API_KEY="${MCP_API_KEY:-}"
+_grav_config="$GRAV_PATH/user/config/plugins/mcp-server.yaml"
+if [[ "${FORCE_ROTATE_TOKENS:-0}" != "1" ]] && [[ -f "$_grav_config" ]]; then
+    _tok=$(grep "^api_key:" "$_grav_config" 2>/dev/null | sed "s/^api_key: *'*//;s/'*$//" || true)
+    [[ -n "$_tok" ]] && MCP_API_KEY="$_tok" && log_info "MCP_API_KEY preserved from existing $_grav_config"
+fi
+if [[ -z "$MCP_API_KEY" ]]; then
     MCP_API_KEY=$(generate_token 32)
-    log_info "Generated MCP_API_KEY (saved in summary file)"
+    if [[ "${FORCE_ROTATE_TOKENS:-0}" == "1" ]]; then
+        log_warn "MCP_API_KEY rotated (--force-rotate-tokens). Claude.ai connector will need re-authentication."
+    else
+        log_info "Generated MCP_API_KEY (saved in summary file)"
+    fi
 fi
 
 # ── Étape 3 : Cloner/mettre à jour le plugin ─────────────────────────────────

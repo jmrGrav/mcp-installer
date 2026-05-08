@@ -2,6 +2,27 @@
 
 All notable changes to mcp-installer will be documented in this file.
 
+## [1.2.0] — 2026-05-08
+
+### Fixed
+- **Critical idempotence bug** (Bug #2): re-running install.sh no longer regenerates
+  MCP tokens, CLIENT_ID/SECRET, or MCP_API_KEY. Existing tokens in `.env` /
+  `secrets.env` / `mcp-server.yaml` are preserved by default. This fixes broken
+  Claude.ai connectors after re-running the installer.
+
+### Added
+- `--force-rotate-tokens` : explicitly regenerate all tokens (warns that existing
+  Claude.ai connectors will need re-authentication).
+- `--dry-run` : show what would be installed without making any changes.
+  Pre-flight checks still run to surface missing dependencies.
+- `--skip-preflight` : bypass pre-flight checks (not recommended).
+- Pre-flight checks verify that required tools (`hugo`, `nginx`, `python3`,
+  `openssl`, `git`, `php`) are present before any module runs.
+
+### Notes
+- Recommended upgrade path from v1.1.0: re-run install.sh on existing installations.
+  Tokens are preserved automatically — no manual intervention needed.
+
 ## [1.1.0] — 2026-05-07
 
 ### Changed

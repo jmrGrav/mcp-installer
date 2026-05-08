@@ -43,10 +43,26 @@ ask_value BACKEND_URL   "Backend MCP URL (internal)"                            
 ask_value BACKEND_HOST  "Backend MCP host header"                                "${BACKEND_HOST:-localhost}"
 ask_value BACKEND_TOKEN "Backend MCP token (MCP_TOKEN from hugo-mcp or Grav)"   "${BACKEND_TOKEN:-}"
 
-# Credentials OAuth générés
-CLIENT_ID=$(generate_token_base64 16)
-CLIENT_SECRET=$(generate_token 32)
-log_info "Generated CLIENT_ID and CLIENT_SECRET (saved in summary file)"
+# Credentials OAuth : préserver si existants (--force-rotate-tokens pour forcer)
+CLIENT_ID="${CLIENT_ID:-}"
+CLIENT_SECRET="${CLIENT_SECRET:-}"
+if [[ "${FORCE_ROTATE_TOKENS:-0}" != "1" ]] && [[ -f "$SECRETS_DIR/secrets.env" ]]; then
+    _cid=$(grep '^CLIENT_ID=' "$SECRETS_DIR/secrets.env" 2>/dev/null | cut -d= -f2- | tr -d '"' || true)
+    _cs=$(grep '^CLIENT_SECRET=' "$SECRETS_DIR/secrets.env" 2>/dev/null | cut -d= -f2- | tr -d '"' || true)
+    if [[ -n "$_cid" ]] && [[ -n "$_cs" ]]; then
+        CLIENT_ID="$_cid"; CLIENT_SECRET="$_cs"
+        log_info "CLIENT_ID and CLIENT_SECRET preserved from existing $SECRETS_DIR/secrets.env"
+    fi
+fi
+if [[ -z "$CLIENT_ID" ]] || [[ -z "$CLIENT_SECRET" ]]; then
+    CLIENT_ID=$(generate_token_base64 16)
+    CLIENT_SECRET=$(generate_token 32)
+    if [[ "${FORCE_ROTATE_TOKENS:-0}" == "1" ]]; then
+        log_warn "CLIENT_ID/SECRET rotated (--force-rotate-tokens). Claude.ai connector will need re-authentication."
+    else
+        log_info "Generated CLIENT_ID and CLIENT_SECRET (saved in summary file)"
+    fi
+fi
 
 # ── Étape 3 : User système ────────────────────────────────────────────────────
 

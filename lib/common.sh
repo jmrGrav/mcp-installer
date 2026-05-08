@@ -118,15 +118,19 @@ print_usage() {
 Usage: sudo bash install.sh [OPTIONS]
 
 Options:
-  --all         Install all three components
-  --hugo        Install Hugo MCP server
-  --grav        Install Grav MCP plugin
-  --oauth       Install OAuth 2.1 proxy
-  --silent      Non-interactive mode (reads env vars, see docs/INSTALL.md)
-  --help, -h    Show this help
+  --all                   Install all three components
+  --hugo                  Install Hugo MCP server
+  --grav                  Install Grav MCP plugin
+  --oauth                 Install OAuth 2.1 proxy
+  --silent                Non-interactive mode (reads env vars, see docs/INSTALL.md)
+  --force-rotate-tokens   Regenerate all tokens (invalidates existing Claude.ai connectors)
+  --dry-run               Show what would be done without making any changes
+  --skip-preflight        Bypass pre-flight checks (not recommended)
+  --help, -h              Show this help
 
 Examples:
   sudo bash install.sh --hugo --oauth
+  sudo bash install.sh --hugo --oauth --dry-run
   sudo SILENT_MODE=1 DOMAIN=mcp.example.com bash install.sh --hugo --oauth
 EOF
 }
