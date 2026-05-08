@@ -107,7 +107,7 @@ create_system_user() {
 banner() {
     echo
     echo "${BOLD}╔══════════════════════════════════════════╗${NC}"
-    echo "${BOLD}║         MCP Installer v1.1.0             ║${NC}"
+    echo "${BOLD}║         MCP Installer v1.2.0             ║${NC}"
     echo "${BOLD}║   Hugo MCP · Grav MCP · OAuth Proxy      ║${NC}"
     echo "${BOLD}╚══════════════════════════════════════════╝${NC}"
     echo
