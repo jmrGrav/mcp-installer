@@ -93,6 +93,29 @@ python3 -m venv "$INSTALL_DIR/venv"
 "$INSTALL_DIR/venv/bin/pip" install --quiet -r "$INSTALL_DIR/requirements.txt"
 log_ok "Dependencies installed"
 
+# ── Étape 5b : TLS — certificat EC P-256 auto-signé (C6) ─────────────────────
+# Le service uvicorn écoute en HTTPS. Le proxy NUC vérifie ce certificat.
+
+log_info "Generating TLS certificate (EC P-256, self-signed, 10 years)..."
+TLS_DIR="$INSTALL_DIR/tls"
+mkdir -p "$TLS_DIR"
+# Detect primary VM IP for SAN
+VM_IP="$(hostname -I | awk '{print $1}')"
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 \
+    -keyout "$TLS_DIR/server.key" \
+    -out    "$TLS_DIR/server.crt" \
+    -days 3650 -nodes \
+    -subj "/CN=$VM_IP" \
+    -addext "subjectAltName=IP:$VM_IP,IP:127.0.0.1" \
+    2>/dev/null
+chmod 600 "$TLS_DIR/server.key"
+chown -R "$SERVICE_USER":"$SERVICE_USER" "$TLS_DIR"
+log_ok "TLS cert generated: $TLS_DIR/server.crt (IP: $VM_IP)"
+log_info "Copy $TLS_DIR/server.crt to your proxy host to enable TLS verification."
+
+# ── Étape 5c : Token migration (C2/C5) ───────────────────────────────────────
+# Convertit MCP_TOKEN en hash bcrypt dans tokens.json après pip install
+
 # ── Étape 6 : Fichier .env ────────────────────────────────────────────────────
 
 log_info "Writing .env..."
@@ -110,6 +133,17 @@ sed \
 chmod 640 "$INSTALL_DIR/.env"
 chown root:"$SERVICE_USER" "$INSTALL_DIR/.env"
 log_ok ".env written"
+
+# ── Étape 6b : Migrer MCP_TOKEN vers tokens.json (bcrypt) ────────────────────
+# token_mgr.py migrate lit MCP_TOKEN depuis .env et crée tokens.json (C2/C5)
+
+if [[ -f "$INSTALL_DIR/token_mgr.py" ]]; then
+    log_info "Migrating MCP_TOKEN to tokens.json (bcrypt cost-12)..."
+    (cd "$INSTALL_DIR" && MCP_TOKEN="$MCP_TOKEN" sudo -u "$SERVICE_USER" \
+        "$INSTALL_DIR/venv/bin/python" token_mgr.py migrate 2>/dev/null) \
+        && log_ok "tokens.json created" \
+        || log_warn "token_mgr.py migrate failed — MCP_TOKEN env fallback still works"
+fi
 
 # ── Étape 7 : deploy.sh ───────────────────────────────────────────────────────
 # Script appelé par main.py pour rebuild le site Hugo après chaque modification.

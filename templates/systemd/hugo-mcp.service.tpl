@@ -8,7 +8,7 @@ User=__USER__
 Group=__GROUP__
 WorkingDirectory=__WORK_DIR__
 EnvironmentFile=__WORK_DIR__/.env
-ExecStart=__WORK_DIR__/venv/bin/uvicorn main:app --host 127.0.0.1 --port __PORT__
+ExecStart=__WORK_DIR__/venv/bin/uvicorn main:app --host 0.0.0.0 --port __PORT__ --ssl-keyfile __WORK_DIR__/tls/server.key --ssl-certfile __WORK_DIR__/tls/server.crt
 Restart=always
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1

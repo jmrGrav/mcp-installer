@@ -2,6 +2,18 @@
 
 All notable changes to mcp-installer will be documented in this file.
 
+## [1.3.0] — 2026-05-09
+
+### Added
+- **C6 TLS**: `install-hugo-mcp.sh` now generates a self-signed EC P-256 TLS cert
+  (`tls/server.crt` + `tls/server.key`) and configures uvicorn with `--ssl-certfile/keyfile`
+- **C2/C5 Token migration**: after `.env` creation, runs `token_mgr.py migrate` to hash
+  `MCP_TOKEN` into `tokens.json` with bcrypt cost-12; MCP_TOKEN env fallback preserved
+
+### Changed
+- `hugo-mcp.service.tpl`: uvicorn binds to `0.0.0.0` (was `127.0.0.1`), adds SSL flags;
+  network access still restricted by UFW / `IPAddressAllow` in the unit
+
 ## [1.2.0] — 2026-05-08
 
 ### Fixed
